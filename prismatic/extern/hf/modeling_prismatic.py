@@ -497,7 +497,7 @@ class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
         self.norm_stats = config.norm_stats
 
         # Compute action bins
-        self.bins = np.linspace(-1, 1, config.n_action_bins)
+        self.bins = np.linspace(-1, 1, 256)
         self.bin_centers = (self.bins[:-1] + self.bins[1:]) / 2.0
 
         # Compute vocab size for de-tokenization -- revert added "multiple of"

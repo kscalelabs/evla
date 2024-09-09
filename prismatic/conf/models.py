@@ -497,6 +497,18 @@ class Prism_7B_DINOSigLIP_224px(Exp_7B_One_Stage):
     finetune_epochs: int = 2
 
 
+@dataclass
+class EVLA_1B_DinoSiglip_224px_Qwen(Exp_7B_One_Stage):
+    model_id: str = "qwen"
+    llm_backbone_id: str = "qwen2-0.5b"
+    vision_backbone_id: str = "dinosiglip-vit-so-224px"
+
+    arch_specifier: str = "no-align+gelu-mlp"
+
+    finetune_global_batch_size: int = 32
+    finetune_per_device_batch_size: int = 4
+
+
 # === Define a Model Registry Enum for Reference & Validation ===
 @unique
 class ModelRegistry(Enum):
@@ -573,6 +585,9 @@ class ModelRegistry(Enum):
     OPT_DINOSIGLIP_224PX_RESIZE_NAIVE = Opt_7B_DINOSigLIP_ViT_SO_p14_224px_Resize_Naive
     PRISM_DINOSIGLIP_224PX_CONTROLLED_7B = Prism_7B_DINOSigLIP_224px_Controlled
     PRISM_DINOSIGLIP_224PX_7B = Prism_7B_DINOSigLIP_224px
+
+    # === Inference Optimized :: 224px Prisms ===
+    EVLA = EVLA_1B_DinoSiglip_224px_Qwen
 
     @property
     def model_id(self) -> str:

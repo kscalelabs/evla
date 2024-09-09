@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import torch
 from PIL import Image
-from transformers import LlamaTokenizerFast
+from transformers import LlamaTokenizerFast, Qwen2TokenizerFast
 
 from prismatic.models.vlms.prismatic import PrismaticVLM
 from prismatic.overwatch import initialize_overwatch
@@ -33,7 +33,7 @@ class OpenVLA(PrismaticVLM):
         self.action_tokenizer = action_tokenizer
 
     @torch.inference_mode()
-    def predict_action(
+    def predict_action2(
         self, image: Image, instruction: str, unnorm_key: Optional[str] = None, **kwargs: str
     ) -> np.ndarray:
         """
@@ -100,6 +100,31 @@ class OpenVLA(PrismaticVLM):
         )
 
         return actions
+
+    @torch.inference_mode()
+    def predict_action(
+        self, input_ids, attention_mask, pixel_values, labels, **kwargs: str
+    ) -> np.ndarray:
+        image_transform, tokenizer = self.vision_backbone.image_transform, self.llm_backbone.tokenizer
+        autocast_dtype = self.llm_backbone.half_precision_dtype
+
+        with torch.autocast("cuda", dtype=autocast_dtype, enabled=self.enable_mixed_precision_training):
+            if isinstance(tokenizer, Qwen2TokenizerFast):
+                generated_ids2 = self.forward(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    pixel_values=pixel_values,
+                    labels=labels,
+                )
+
+        action_preds = generated_ids2.logits[:, self.vision_backbone.num_patches : -1].argmax(dim=2)
+        action_gt = labels[:, 1:].to(action_preds.device)
+        mask = action_gt > self.action_tokenizer.action_token_begin_idx
+        correct_preds = (action_preds == action_gt) & mask
+        action_accuracy = correct_preds.sum().float() / mask.sum().float()
+        print(f"Action Accuracy naive: {action_accuracy}")
+
+        return action_gt
 
     @staticmethod
     def _check_unnorm_key(norm_stats: Dict, unnorm_key: str) -> str:

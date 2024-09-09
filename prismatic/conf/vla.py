@@ -198,6 +198,85 @@ class Exp_SigLIP_224px_Droid_Wipe(Exp_SigLIP_224px_Bridge):
     data_mix: str = "droid_wipe"
 
 
+# === [1 GPU] Stompy Test - tiny model + Kuka data ===
+@dataclass
+class TestConfig(VLAConfig):
+    vla_id: str = "debug"
+    base_vlm: Union[str, Path] = "qwen"
+
+    freeze_vision_backbone: bool = True
+    freeze_llm_backbone: bool = True
+    unfreeze_last_llm_layer: bool = True
+
+    # Data Mixture Parameters
+    shuffle_buffer_size: int = 500
+
+    # Optimization Parameters
+    epochs: int = 50
+    max_steps: Optional[int] = None
+
+    # This one is max for 1 nodes
+    expected_world_size: int = 1
+    global_batch_size: int = 1
+    per_device_batch_size: int = 1
+
+    learning_rate: float = 2e-5
+    weight_decay: float = 0.0
+    max_grad_norm: float = 1.0
+    lr_scheduler_type: str = "constant"
+    warmup_ratio: float = 0.0
+
+    train_strategy: str = "ddp"
+
+    data_mix: str = "bridge"
+
+    enable_gradient_checkpointing: bool = False
+
+
+
+# = [80 GPU] Qwen1B + OXE Magic Soup =
+@dataclass
+class EVLA_1B_DinoSiglip_224px_Qwen(TestConfig):
+    vla_id: str = "evla"
+    base_vlm: Union[str, Path] = "qwen"
+
+    freeze_vision_backbone: bool = True
+    freeze_llm_backbone: bool = False
+    unfreeze_last_llm_layer: bool = False
+
+    data_mix: str = "oxe_magic_soup_plus_minus"
+
+    shuffle_buffer_size: int = 256_000
+
+    # 10 nodes
+    expected_world_size: int = 80
+    global_batch_size: int = 1280
+    per_device_batch_size: int = 16
+
+    train_strategy: str = "fsdp-full-shard"
+    epochs: int = 2
+
+
+# @dataclass
+# class TestConfig(StompyTest):
+#     vla_id: str = "debug"
+#     base_vlm: Union[str, Path] = "qwen"
+
+#     freeze_vision_backbone: bool = True
+#     freeze_llm_backbone: bool = False
+#     unfreeze_last_llm_layer: bool = False
+
+#     shuffle_buffer_size: int = 1_000
+#     data_mix: str = "bridge"
+
+#     expected_world_size: int = 1
+#     global_batch_size: int = 1
+#     per_device_batch_size: int = 1
+
+#     train_strategy: str = "ddp"
+
+
+
 # === Define a VLA Registry Enum for Reference & Validation ===
 @unique
 class VLARegistry(Enum):
@@ -224,6 +303,12 @@ class VLARegistry(Enum):
 
     # === DROID Fine-tuning Configs ===
     SIGLIP_224PX_MX_DROID_WIPE = Exp_SigLIP_224px_Droid_Wipe
+
+    # === EVLA Configs ===
+    EVLA = EVLA_1B_DinoSiglip_224px_Qwen
+
+    # === Debug Configs ===
+    DEBUG = TestConfig
 
     @property
     def vla_id(self) -> str:
