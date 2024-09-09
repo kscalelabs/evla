@@ -176,7 +176,7 @@ class MultitokenQwen2ForCausalLM(Qwen2ForCausalLM):
     _tied_weights_keys = ["lm_head.weight"]
 
     def __init__(self, config):
-        # pfb30 - make this a configurableparameter
+        # pfb30 - make this a configurable parameter
         config._attn_implementation = "eager"
         super().__init__(config)
         self.model = MultitokenQwen2Model(config)
@@ -224,7 +224,7 @@ class MultiQwenLLMBackbone(HFCausalLLMBackbone):
     @property
     def prompt_builder_fn(self) -> Type[PromptBuilder]:
         if self.identifier.startswith("qwen"):
-            return PurePromptBuilder
+            return QwenPromptBuilder
 
         raise ValueError(f"No PromptBuilder defined for LLM Backbone `{self.identifier}`")
 

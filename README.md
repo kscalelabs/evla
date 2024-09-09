@@ -47,6 +47,13 @@ CUDA_VISIBLE_DEVICES=0 LOCAL_RANK=0 MASTER_ADDR=localhost MASTER_PORT=1235 pytho
 ```
 The full-scale training can be run with the 'evla' config.
 
+
+## TODO
+1. Remove the hardcoded attention setup.
+2. Export model to the HF format.
+3. Add support for LoRA.
+
+
 ## Citation
 
 ```bibtex

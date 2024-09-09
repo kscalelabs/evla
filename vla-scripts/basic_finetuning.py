@@ -1,6 +1,6 @@
 """
-test.py
-
+An illustrative example of running the inference (without action tokens).
+If you add your own dataset to the dataloader, you can easily finetune to your use case.
 """
 
 import json
@@ -23,13 +23,14 @@ from prismatic.vla import get_vla_dataset_and_collator
 from prismatic.vla.datasets.rlds.utils.data_utils import save_dataset_statistics
 from transformers import AutoProcessor
 import numpy as np
+
+MODEL_PATH = "evla_09092024/checkpoints/latest-checkpoint.pt"  
+
 # Sane Defaults
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-
 # Initialize Overwatch =>> Wraps `logging.Logger`
 overwatch = initialize_overwatch(__name__)
-
 
 @dataclass
 class TrainConfig:
@@ -47,7 +48,7 @@ class TrainConfig:
     run_root_dir: Path = Path("runs")                               # Path to directory to store logs & checkpoints
 
     # Resume Run Parameters
-    pretrained_checkpoint: str = "/nfs/scratch/pawel/inference_vla/26082024_qwen_multi/checkpoints/latest-checkpoint.pt"                    # Absolute Path to Checkpoint
+    pretrained_checkpoint: str = MODEL_PATH                  # Absolute Path to Checkpoint
 
     is_resume: bool = True                                          # Whether we are continuing a prior training run
                                                                     #   (only applicable given pretrained checkpoint)
@@ -91,7 +92,7 @@ class TrainConfig:
 
 
 @draccus.wrap()
-def test(cfg: TrainConfig) -> None:
+def basic_finetuning(cfg: TrainConfig) -> None:
     torch.cuda.set_device(device_id := 0)
     torch.cuda.empty_cache()
 
@@ -102,10 +103,6 @@ def test(cfg: TrainConfig) -> None:
         if cfg.run_id is None
         else cfg.run_id
     )
-    if cfg.run_id_note is not None:
-        cfg.run_id += f"--{cfg.run_id_note}"
-    if cfg.image_aug:
-        cfg.run_id += "--image_aug"
 
     os.makedirs(run_dir := (cfg.run_root_dir / cfg.run_id), exist_ok=True)
 
@@ -116,7 +113,7 @@ def test(cfg: TrainConfig) -> None:
     #   =>> Note :: Verifies that all parameters are loaded in FP32 on load!
     vlm = load_vla(
         cfg.pretrained_checkpoint, hf_token=hf_token, load_for_training=True
-    ).to("cuda:0")
+    )
 
     # [Validate] Model should be in Full Precision!
     for param in vlm.parameters():
@@ -151,46 +148,21 @@ def test(cfg: TrainConfig) -> None:
     mixed_precision_dtype = torch.bfloat16
     enable_mixed_precision_training = True
     
-    # we can copy from batch dataload-  we have to verify its the same data
-    # original version
     for batch in dataloader:
-        with torch.autocast(
-            "cuda", dtype=mixed_precision_dtype, enabled=enable_mixed_precision_training
-        ):
+        # [Contract] self.vlm.forward() must automatically compute `loss` and return!
+        output: CausalLMOutputWithPast = vlm(
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+            pixel_values=batch["pixel_values"],
+            labels=batch["labels"],
+        )
+        action_preds = output.logits[:, num_patches : -1].argmax(dim=2)
+        action_gt = batch["labels"][:, 1:].to(action_preds.device)
+        mask = action_gt > action_tokenizer.action_token_begin_idx
 
-            batch["pixel_values"]["siglip"] = batch["pixel_values"]["siglip"].to("cuda:0")
-            batch["pixel_values"]["dino"] = batch["pixel_values"]["dino"].to("cuda:0")
-            # [Contract] self.vlm.forward() must automatically compute `loss` and return!
-            output: CausalLMOutputWithPast = vlm(
-                input_ids=batch["input_ids"].to("cuda:0"),
-                attention_mask=batch["attention_mask"].to("cuda:0"),
-                pixel_values=batch["pixel_values"],
-                labels=batch["labels"].to("cuda:0"),
-            )
-            action_preds = output.logits[:, num_patches : -1].argmax(dim=2)
-            action_gt = batch["labels"][:, 1:].to(action_preds.device)
-            mask = action_gt > action_tokenizer.action_token_begin_idx
-
-            correct_preds = (action_preds == action_gt) & mask
-            print(f"Action Accuracy original: {correct_preds.sum().float() / mask.sum().float()}")
-
-            # first naive
-            import time
-            start_time = time.time()
-            action = vlm.predict_action(batch["input_ids"].to("cuda:0"), batch["attention_mask"].to("cuda:0"), batch["pixel_values"], batch["labels"].to("cuda:0"))
-            end_time = time.time()
-            print(f"Time taken: {end_time - start_time}")
-            # # second version
-            # device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-            # INSTRUCTION = "put spoon on towel"
-            # prompt = f"In: What action should the robot take to {INSTRUCTION.lower()}?\nOut:"
-            # MODEL_PATH = "openvla/openvla-7b"
-            # processor = AutoProcessor.from_pretrained(MODEL_PATH, trust_remote_code=True)
-            # image = Image.fromarray(np.asarray(np.random.rand(256, 256, 3) * 255, dtype=np.uint8))
-            # inputs = processor(prompt, image).to(device, dtype=torch.bfloat16)
-
-            # action = vlm.predict_action2(image, INSTRUCTION, unnorm_key="bridge_orig", do_sample=False)
+        correct_preds = (action_preds == action_gt) & mask
+        print(f"Action accuracy: {correct_preds.sum().float() / mask.sum().float()}")
 
 
 if __name__ == "__main__":
-    test()
+    basic_finetuning()
