@@ -14,8 +14,7 @@
 # EdgeVLA: An Open-Source Vision-Language-Action Model
 
 # Introduction
-This repository is a direct fork of [Prismatic VLMs](https://github.com/TRI-ML/prismatic-vlms) and [OpenVLA](https://github.com/openvla/openvla).
-You can train from scratch, finetune or test [our pre-trained models](https://kscale-public.s3.amazonaws.com/evla_09092024/). See [our blog](https://medium.com/@budzianowski/34baf4f434ec) for more details about the pre-trained model.
+We propose training efficient VLA models based on SLMs like Qwen2 with non-autoregressive objective. Our early results shows that these models achieve similar training characteristics compared to much larger counterparts. This repository is a direct fork of [Prismatic VLMs](https://github.com/TRI-ML/prismatic-vlms) and [OpenVLA](https://github.com/openvla/openvla). You can train from scratch, finetune or test [our pre-trained models]([https://kscale-public.s3.amazonaws.com/evla_09092024/](https://kscale-public.s3.amazonaws.com/evla_09092024/evla_09092024.tar.gz)). See [our blog](https://medium.com/@budzianowski/34baf4f434ec) for more details about the architecture.
 
 ## Setup
 ```
