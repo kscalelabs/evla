@@ -19,19 +19,9 @@ We propose training efficient VLA models based on SLMs like Qwen2 with non-autor
 ## Setup
 ```
 conda create --name vla python=3.10
-conda activate vla
-cd vla
+conda activate evla
+cd evla
 pip install -e .
-
-# Training additionally requires Flash-Attention 2 (https://github.com/Dao-AILab/flash-attention)
-pip install packaging ninja
-
-# Verify Ninja --> should return exit code "0"
-ninja --version; echo $?
-
-# Install Flash Attention 2
-#   =>> If you run into difficulty, try `pip cache remove flash_attn` first
-pip install "flash-attn==2.5.5" --no-build-isolation
 ```
 Now you have to add HF TOKEN under `.hf_token` to run models like llama2/3 or qwen2.
 
@@ -44,7 +34,7 @@ CUDA_VISIBLE_DEVICES=0 LOCAL_RANK=0 MASTER_ADDR=localhost MASTER_PORT=1235 pytho
  --data_root_dir DATA_ROOT_DIR \
  --run_root_dir RUN_ROOT_DIR
 ```
-The full-scale training can be run with the 'evla' config.
+The full-scale training can be run with the 'evla' config from `prismatic/conf/vla.py`.
 
 
 ## TODO
@@ -58,7 +48,7 @@ The full-scale training can be run with the 'evla' config.
 ```bibtex
 @article{kscale2024evla,
     title={EdgeVLA: Efficient Vision-Language-Action Models},
-    author={K-Scale Labs},
+    author={Paweł Budzianowski, Wesley Ma, Matthew Freed, Jingxiang Mo, Aaron Xie, Viraj Tipnis, Benjamin Bolte},
     year={2024}
 } 
 ```
