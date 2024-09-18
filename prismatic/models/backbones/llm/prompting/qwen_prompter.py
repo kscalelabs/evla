@@ -20,8 +20,8 @@ class QwenPromptBuilder(PromptBuilder):
 
         # Get role-specific "wrap" functions
         self.wrap_human = lambda msg: f"In: {msg}\nOut: "
-        self.wrap_gpt = lambda msg: f"{msg if msg != '' else ' '}\n{self.eos}"
-
+        self.wrap_gpt = lambda msg: f"{msg if msg != '' else ' '}{self.eos}"
+    
         # === `self.prompt` gets built up over multiple turns ===
         self.prompt, self.turn_count = "", 0
 

@@ -561,6 +561,21 @@ OXE_DATASET_CONFIGS = {
         "state_encoding": StateEncoding.POS_EULER,
         "action_encoding": ActionEncoding.EEF_POS,
     },
+    "fmb": {
+        "image_obs_keys": {
+            "primary": "image_side_1",
+            "secondary": "image_side_2",
+            "wrist": "image_wrist_1",
+        },
+        "depth_obs_keys": {
+            "primary": "image_side_1_depth",
+            "secondary": "image_side_2_depth",
+            "wrist": "image_wrist_1_depth",
+        },
+        "state_obs_keys": ["proprio"],
+        "state_encoding": StateEncoding.POS_EULER,
+        "action_encoding": ActionEncoding.EEF_POS,
+    },
     "dobbe": {
         "image_obs_keys": {"primary": "wrist_image", "secondary": None, "wrist": None},
         "depth_obs_keys": {"primary": None, "secondary": None, "wrist": None},

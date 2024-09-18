@@ -132,7 +132,7 @@ OXE_NAMED_MIXTURES: Dict[str, List[Tuple[str, float]]] = {
         ("cmu_stretch", 1.0),
         ## New Datasets in MagicSoup++
         ("bc_z", 0.2),                                          # Note: use v0.1.0 --> later versions broken
-        ("fmb_dataset", 1.0),
+        ("fmb", 1.0),
         ("dobbe", 0.2),
         ("droid", 0.06),
     ],
@@ -163,7 +163,7 @@ OXE_NAMED_MIXTURES: Dict[str, List[Tuple[str, float]]] = {
         ("cmu_stretch", 1.0),
         ## New Datasets in MagicSoup++
         ("bc_z", 0.2),                                          # Note: use v0.1.0 --> later versions broken
-        ("fmb_dataset", 1.0),
+        ("fmb", 1.0),
         ("dobbe", 0.2),
         # ("droid", 0.06),
     ],
