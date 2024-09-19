@@ -48,7 +48,7 @@ The full-scale training can be run with the 'evla' config from `prismatic/conf/v
 ```bibtex
 @article{kscale2024evla,
     title={EdgeVLA: Efficient Vision-Language-Action Models},
-    author={Paweł Budzianowski, Wesley Ma, Matthew Freed, Jingxiang Mo, Aaron Xie, Viraj Tipnis, Benjamin Bolte},
+    author={Paweł Budzianowski, Wesley Maa, Matthew Freed, Jingxiang Mo, Aaron Xie, Viraj Tipnis, Benjamin Bolte},
     year={2024}
 } 
 ```
