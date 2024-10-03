@@ -18,7 +18,7 @@ We propose training efficient VLA models based on SLMs like Qwen2 with non-autor
 
 ## Setup
 ```
-conda create --name vla python=3.10
+conda create --name evla python=3.10
 conda activate evla
 cd evla
 pip install -e .
